@@ -1,0 +1,157 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Utilisateurs autorisés de l'application",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "nom": { "type": "string" },
+        "prenom": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "gestionnaire"] }
+      },
+      "required": ["email", "role"]
+    },
+    "Demande": {
+      "title": "Demande",
+      "description": "Demandes administratives",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "typeDemande": { "type": "string" },
+        "description": { "type": "string" },
+        "urgence": { "type": "string", "enum": ["normale", "haute", "urgente"] },
+        "statut": { "type": "string", "enum": ["en attente", "en cours", "approuvée", "rejetée", "clôturée"] },
+        "quantite": { "type": "number" },
+        "montant": { "type": "number" },
+        "justification": { "type": "string" },
+        "piecesJointes": { "type": "array" },
+        "reponseIA": { "type": "string" },
+        "reponseFinale": { "type": "string" },
+        "dateCreation": { "type": "string", "format": "date-time" },
+        "dateReponse": { "type": "string", "format": "date-time" },
+        "observations": { "type": "string" }
+      }
+    },
+    "TypeDemande": {
+      "title": "Type de Demande",
+      "description": "Configuration des types de demandes",
+      "type": "object",
+      "properties": {
+        "libelle": { "type": "string" },
+        "actif": { "type": "boolean" },
+        "champsSupplementaires": { "type": "array" },
+        "dateCreation": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Comptabilite": {
+      "title": "Opération Comptable",
+      "description": "Recettes et dépenses",
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["recette", "depense"] },
+        "montant": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "categorie": { "type": "string" },
+        "activite": { "type": "string", "enum": ["agriculture", "elevage"] },
+        "description": { "type": "string" },
+        "justificatif": { "type": "string" }
+      }
+    },
+    "Agenda": {
+      "title": "Événement Agenda",
+      "description": "Événements et rappels",
+      "type": "object",
+      "properties": {
+        "titre": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string" },
+        "dateDebut": { "type": "string", "format": "date-time" },
+        "dateFin": { "type": "string", "format": "date-time" },
+        "lieu": { "type": "string" },
+        "rappel": { "type": "boolean" }
+      }
+    },
+    "Document": {
+      "title": "Document GED",
+      "description": "Fichiers stockés dans la GED",
+      "type": "object",
+      "properties": {
+        "titre": { "type": "string" },
+        "categorie": { "type": "string" },
+        "tags": { "type": "array" },
+        "description": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "fileName": { "type": "string" },
+        "fileSize": { "type": "number" },
+        "dateUpload": { "type": "string", "format": "date-time" },
+        "version": { "type": "string" }
+      }
+    },
+    "Facture": {
+      "title": "Facture",
+      "description": "Factures émises",
+      "type": "object",
+      "properties": {
+        "numero": { "type": "string" },
+        "dateFacture": { "type": "string", "format": "date-time" },
+        "destinataire": { "type": "object" },
+        "lignes": { "type": "array" },
+        "sousTotal": { "type": "number" },
+        "tva": { "type": "number" },
+        "total": { "type": "number" },
+        "statut": { "type": "string", "enum": ["brouillon", "émise", "payée"] },
+        "pdfUrl": { "type": "string" },
+        "dateCreation": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Parametres": {
+      "title": "Paramètres",
+      "description": "Paramètres globaux de l'application",
+      "type": "object",
+      "properties": {
+        "nomGie": { "type": "string" },
+        "adresse": { "type": "string" },
+        "telephone": { "type": "string" },
+        "email": { "type": "string" },
+        "numeroAgrement": { "type": "string" },
+        "geminiApiKey": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Liste des utilisateurs autorisés"
+    },
+    "demandes": {
+      "schema": "Demande",
+      "description": "Demandes administratives"
+    },
+    "typesDemandes": {
+      "schema": "TypeDemande",
+      "description": "Types de demandes configurables"
+    },
+    "comptabilite": {
+      "schema": "Comptabilite",
+      "description": "Mouvements financiers"
+    },
+    "agenda": {
+      "schema": "Agenda",
+      "description": "Calendrier des activités"
+    },
+    "documents": {
+      "schema": "Document",
+      "description": "GED"
+    },
+    "factures": {
+      "schema": "Facture",
+      "description": "Module facturation"
+    },
+    "parametres": {
+      "schema": "Parametres",
+      "description": "Configuration globale"
+    }
+  }
+}

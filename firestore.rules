@@ -1,0 +1,95 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function getEmail() {
+      return request.auth.token.email;
+    }
+
+    // Check if the user is in the authorized users collection
+    function isAuthorized() {
+      return isSignedIn() && isEmailVerified() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isAuthorized() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Collections ---
+
+    // USERS: Only users can read their own profile, only admins can manage users
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      // Allow the authorized admin to create their own profile
+      allow create: if isSignedIn() && request.auth.uid == userId && 
+                    (request.resource.data.email == 'moonlights7480@gmail.com' || 
+                     request.resource.data.email == 'fatoumorsylla17@gmail.com');
+      allow update, delete: if isAdmin();
+    }
+
+    // COMPTABILITE
+    match /comptabilite/{docId} {
+      allow read, write: if isAuthorized();
+    }
+
+    // DEMANDES
+    match /demandes/{docId} {
+      allow read, write: if isAuthorized();
+    }
+
+    // TYPES DEMANDES
+    match /typesDemandes/{docId} {
+      allow read: if isAuthorized();
+      allow write: if isAdmin();
+    }
+
+    // AGENDA
+    match /agenda/{docId} {
+      allow read, write: if isAuthorized();
+    }
+
+    // DOCUMENTS
+    match /documents/{docId} {
+      allow read, write: if isAuthorized();
+    }
+
+    // FACTURES
+    match /factures/{docId} {
+      allow read, write: if isAuthorized();
+    }
+
+    // PARAMETRES
+    match /parametres/{docId} {
+      allow read: if isAuthorized();
+      allow write: if isAdmin();
+    }
+  }
+}
