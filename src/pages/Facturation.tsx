@@ -186,15 +186,55 @@ const Facturation: React.FC = () => {
               </div>
               <div className="space-y-1.5"><label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Date facture</label><input type="date" value={form.dateFacture} onChange={e => setForm({ ...form, dateFacture: e.target.value })} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-bold" /></div>
               {/* Lignes */}
-              <div className="space-y-3"><p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lignes de facture</p>
-                {form.lignes.map((l, i) => (<div key={i} className="flex gap-2 items-end">
-                  <div className="flex-1"><input type="text" required value={l.designation} onChange={e => updateLigne(i, 'designation', e.target.value)} placeholder="Désignation" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium" /></div>
-                  <div className="w-20"><input type="number" min={1} value={l.quantite} onChange={e => updateLigne(i, 'quantite', Number(e.target.value))} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-bold font-mono text-center" /></div>
-                  <div className="w-28"><input type="number" min={0} value={l.prixUnitaire} onChange={e => updateLigne(i, 'prixUnitaire', Number(e.target.value))} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-bold font-mono" /></div>
-                  <span className="text-sm font-black font-mono text-slate-700 w-24 text-right">{l.total.toLocaleString()} F</span>
-                  <button type="button" onClick={() => removeLigne(i)} className="p-1.5 text-slate-300 hover:text-rose-500"><Trash2 className="w-4 h-4" /></button>
-                </div>))}
-                <button type="button" onClick={addLigne} className="w-full py-2 border-2 border-dashed border-slate-200 text-slate-400 rounded-xl text-xs font-bold hover:border-emerald-400 hover:text-emerald-600 transition-colors"><Plus className="w-3.5 h-3.5 inline mr-1" />Ajouter une ligne</button>
+              <div className="space-y-4">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lignes de facture</p>
+                {form.lignes.map((l, i) => (
+                  <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100 space-y-4 lg:space-y-0 lg:bg-transparent lg:border-none lg:p-0 lg:flex lg:gap-2 lg:items-end">
+                    <div className="flex-1 space-y-1.5">
+                      <label className="text-[9px] font-bold text-slate-400 uppercase lg:hidden">Désignation</label>
+                      <input 
+                        type="text" 
+                        required 
+                        value={l.designation} 
+                        onChange={e => updateLigne(i, 'designation', e.target.value)} 
+                        placeholder="Désignation" 
+                        className="w-full px-4 py-3 bg-white lg:bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-sm font-medium" 
+                      />
+                    </div>
+                    <div className="flex gap-3 lg:gap-2">
+                      <div className="flex-1 lg:w-20 space-y-1.5">
+                        <label className="text-[9px] font-bold text-slate-400 uppercase lg:hidden">Qté</label>
+                        <input 
+                          type="number" 
+                          min={1} 
+                          value={l.quantite} 
+                          onChange={e => updateLigne(i, 'quantite', Number(e.target.value))} 
+                          className="w-full px-4 py-3 bg-white lg:bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-bold font-mono text-center" 
+                        />
+                      </div>
+                      <div className="flex-[2] lg:w-28 space-y-1.5">
+                        <label className="text-[9px] font-bold text-slate-400 uppercase lg:hidden">Prix Unitaire</label>
+                        <input 
+                          type="number" 
+                          min={0} 
+                          value={l.prixUnitaire} 
+                          onChange={e => updateLigne(i, 'prixUnitaire', Number(e.target.value))} 
+                          className="w-full px-4 py-3 bg-white lg:bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm font-bold font-mono" 
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between lg:justify-end lg:w-32 pt-2 lg:pt-0 border-t lg:border-none border-slate-200">
+                      <div className="lg:hidden text-[9px] font-bold text-slate-400 uppercase">Total</div>
+                      <span className="text-sm font-black font-mono text-slate-700">{l.total.toLocaleString()} F</span>
+                      <button type="button" onClick={() => removeLigne(i)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg lg:ml-2">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                <button type="button" onClick={addLigne} className="w-full py-3 border-2 border-dashed border-slate-200 text-slate-400 rounded-xl text-xs font-bold hover:border-emerald-400 hover:text-emerald-600 transition-colors bg-white">
+                  <Plus className="w-3.5 h-3.5 inline mr-1" />Ajouter une ligne
+                </button>
               </div>
               {/* TVA & Total */}
               <div className="bg-slate-50 p-4 rounded-2xl space-y-2"><div className="flex items-center justify-between"><span className="text-xs font-bold text-slate-500">Sous-total</span><span className="text-sm font-bold font-mono text-slate-700">{sousTotal.toLocaleString()} F</span></div><div className="flex items-center justify-between"><span className="text-xs font-bold text-slate-500 flex items-center gap-2">TVA <input type="number" min={0} max={100} value={form.tva} onChange={e => setForm({ ...form, tva: Number(e.target.value) })} className="w-16 px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold font-mono text-center" />%</span><span className="text-sm font-bold font-mono text-slate-700">{tvaAmount.toLocaleString()} F</span></div><div className="flex items-center justify-between pt-2 border-t border-slate-200"><span className="text-sm font-black text-slate-900">TOTAL</span><span className="text-xl font-black font-mono text-emerald-700">{total.toLocaleString()} F</span></div></div>

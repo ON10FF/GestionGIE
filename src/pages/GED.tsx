@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Search, Upload, Download, Trash2, X, FileText, FileImage, File, FolderOpen, Tag, Eye, Loader2 } from 'lucide-react';
 import { collection, query, orderBy, onSnapshot, addDoc, deleteDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../firebase';
+import { db } from '../firebase';
+import { supabase } from '../supabase';
 import { GedDocument } from '../types';
 import { cn } from '../lib/utils';
 import { format } from 'date-fns';
@@ -59,26 +59,63 @@ const GED: React.FC = () => {
     e.preventDefault();
     if (!selectedFile || !form.titre) return;
     setUploading(true);
+    setUploadProgress(10);
     try {
-      const storageRef = ref(storage, `documents/${Date.now()}_${selectedFile.name}`);
-      const uploadTask = uploadBytesResumable(storageRef, selectedFile);
-      uploadTask.on('state_changed', (snap) => setUploadProgress(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)));
-      await uploadTask;
-      const url = await getDownloadURL(storageRef);
+      const fileName = `${Date.now()}_${selectedFile.name.replace(/\s+/g, '_')}`;
+      const filePath = `documents/${fileName}`;
+      
+      // Upload to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('documents')
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) throw error;
+      setUploadProgress(70);
+
+      // Get Public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      // Save metadata to Firestore
       await addDoc(collection(db, 'documents'), {
-        titre: form.titre, categorie: form.categorie, tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
-        description: form.description, fileUrl: url, fileName: selectedFile.name, fileSize: selectedFile.size,
-        dateUpload: serverTimestamp(), version: form.version,
+        titre: form.titre, 
+        categorie: form.categorie, 
+        tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
+        description: form.description, 
+        fileUrl: publicUrl, 
+        fileName: selectedFile.name, 
+        fileSize: selectedFile.size,
+        filePath: filePath, // Store the path for deletion
+        dateUpload: serverTimestamp(), 
+        version: form.version,
       });
-      setModal(false); setForm({ titre: '', categorie: 'admin', tags: '', description: '', version: '1.0' }); setSelectedFile(null); setUploadProgress(0);
-    } catch (err) { console.error(err); }
+
+      setUploadProgress(100);
+      setModal(false); 
+      setForm({ titre: '', categorie: 'admin', tags: '', description: '', version: '1.0' }); 
+      setSelectedFile(null); 
+      setUploadProgress(0);
+    } catch (err) { 
+      console.error(err); 
+      alert('Erreur lors de l\'upload : ' + (err as any).message);
+    }
     setUploading(false);
   };
 
   const del = async (docu: GedDocument) => {
     if (!window.confirm('Supprimer ce document ?')) return;
     try {
-      if (docu.fileUrl) { const sRef = ref(storage, docu.fileUrl); await deleteObject(sRef).catch(() => {}); }
+      // Delete from Supabase Storage
+      const path = (docu as any).filePath || docu.fileUrl.split('/public/documents/')[1];
+      if (path) {
+        await supabase.storage.from('documents').remove([path]);
+      }
+      
+      // Delete from Firestore
       await deleteDoc(doc(db, 'documents', docu.id));
     } catch (err) { console.error(err); }
   };
