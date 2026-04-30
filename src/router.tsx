@@ -10,6 +10,7 @@ import GED from './pages/GED';
 import Facturation from './pages/Facturation';
 import Parametres from './pages/Parametres';
 import { useAuth } from './contexts/AuthContext';
+import RouteError from './components/RouteError';
 
 // Simple loading spinner
 const LoadingScreen = () => (
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+    errorElement: <RouteError />,
   },
   {
     path: '/',
@@ -47,6 +49,7 @@ export const router = createBrowserRouter([
         <Layout />
       </ProtectedRoute>
     ),
+    errorElement: <RouteError />,
     children: [
       {
         index: true,
